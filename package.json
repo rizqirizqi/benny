@@ -1,0 +1,17 @@
+{
+  "name": "benny-bot",
+  "version": "1.0.0",
+  "description": "o2o-mvp-telegram-bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start" : "node index.js"
+  },
+  "author": "M. Azki Darmawan <azki.darmawan@bukalapak.com>",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3"
+  }
+}
