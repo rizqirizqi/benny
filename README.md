@@ -19,7 +19,7 @@ O2O MVP Squad
   ```
 
 ## Up and Running
-1. Run now service
+1. Run `now` service
   ```
   now
   ```
