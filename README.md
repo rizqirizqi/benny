@@ -19,11 +19,15 @@ O2O MVP Squad
   ```
 
 ## Up and Running
-1. Run `now` service
+1. Install `now` service
+  ```
+  npm install -g now
+  ```
+2. Run `now` service
   ```
   now
   ```
-2. Set webhook
+3. Set webhook
   ```
   curl -F "url=https://telegram-bot-xxxxxxxxxx.now.sh/new-message"  https://api.telegram.org/bot<your_api_token>/setWebhook
   ```
