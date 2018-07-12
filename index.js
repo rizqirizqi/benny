@@ -18,15 +18,18 @@ var creds = require('./client_secret.json');
 var doc = new GoogleSpreadsheet('your_spreadsheet_id');
 
 // API for send a message
-var sendMessageAPI = 'https://api.telegram.org/bot614818563:AAFcm-bEILWPnkj8oKNSUupdEy3snLj0meU/sendMessage';
+var sendMessageAPI = 'https://api.telegram.org/bot<your_bot_token>/sendMessage';
+
+// Bot Name
+var bot = 'eddy'
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
   const {message} = req.body
 
-  if (message.text.toLowerCase().indexOf('eddy') >= 0 && message.text.toLowerCase().indexOf('tolong') >= 0) {
+  if (message.text.toLowerCase().indexOf(bot) >= 0 && message.text.toLowerCase().indexOf('tolong') >= 0) {
     var help = message.text.toLowerCase().split("tolong");
-    var talk = help[1].split("eddy");
+    var talk = help[1].split(bot);
     // Authenticate with the Google Spreadsheets API.
     doc.useServiceAccountAuth(creds, function (err) {
       // Get the cells from the first row of the spreadsheet.
