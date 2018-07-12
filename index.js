@@ -15,10 +15,10 @@ var GoogleSpreadsheet = require('google-spreadsheet');
 var creds = require('./client_secret.json');
 
 // Create a document object using the ID of the spreadsheet - obtained from its URL.
-var doc = new GoogleSpreadsheet('1RqmvQujkVrG62z_rdKhnvIqthO1jhs-AURz0kDMqfGc');
+var doc = new GoogleSpreadsheet('your_spreadsheet_id');
 
 // API for send a message
-var sendMessageAPI = 'https://api.telegram.org/bot600918879:AAHOU6NiYiNksxpn48_5_nRNIs83wrCNScw/sendMessage';
+var sendMessageAPI = 'https://api.telegram.org/bot614818563:AAFcm-bEILWPnkj8oKNSUupdEy3snLj0meU/sendMessage';
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
@@ -200,8 +200,10 @@ app.post('/new-message', function(req, res) {
             cells[1].setValue('Automation Testing 🔁', function (err, c) {});
           } else if (cells[1].value == 'Automation Testing 🔁'){
             cells[1].setValue('Ready to Deploy 💡', function (err, c) {});
+          } else if (cells[1].value == 'Ready to Deploy 💡'){
+            cells[1].setValue('Merged 🔯', function (err, c) {});
           } else {
-            cells[1].setValue('DONE ✔️', function (err, c) {});
+            cells[1].setValue('DONE ✅', function (err, c) {});
           }
           var prLink = cells[0].value;
           if (cells[2].value != '-') {
@@ -240,7 +242,9 @@ app.post('/new-message', function(req, res) {
           , function (err, cells) {
           var d = new Date(Date.now()).toLocaleString();
           cells[3].setValue(d, function (err, c) {});
-          if (cells[1].value == 'DONE ✔️'){
+          if (cells[1].value == 'DONE ✅'){
+            cells[1].setValue('Merged 🔯', function (err, c) {});
+          } else if (cells[1].value == 'Merged 🔯'){
             cells[1].setValue('Ready to Deploy 💡', function (err, c) {});
           } else if (cells[1].value == 'Ready to Deploy 💡'){
             cells[1].setValue('Automation Testing 🔁', function (err, c) {});
