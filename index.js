@@ -48,7 +48,7 @@ var j = schedule.scheduleJob('30 14 * * *', function(){
 app.post('/new-message', function(req, res) {
   const { message } = req.body
 
-  if (typeof message.text === 'undefined') return res.send('OK');
+  if (typeof message === 'undefined' || typeof message.text === 'undefined') return res.send('OK');
 
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
     registeredGroupId = message.chat.id;
@@ -128,7 +128,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var task = message.text.match(/add (.*)/);
+      var task = message.text.match(/add@?.* (.*)/);
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -207,7 +207,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/done (.*)/);
+      var num = message.text.match(/done@?.* (.*)/);
       var links = num[1].split(' ');
       var number = links[0];
       var link = '-';
@@ -261,7 +261,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/revert (.*)/);
+      var num = message.text.match(/revert@?.* (.*)/);
       var number = num[1];
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
@@ -309,7 +309,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/fix (.*)/);
+      var num = message.text.match(/fix@?.* (.*)/);
       var number = num[1];
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
@@ -347,7 +347,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/link (.*)/);
+      var num = message.text.match(/link@?.* (.*)/);
       var links = num[1].split(' ');
       var number = links[0];
       var link = '-';
