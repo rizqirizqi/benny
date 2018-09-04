@@ -1,16 +1,19 @@
 # Benny
-Telegram Bot for o2o_mvp operation
+Telegram Bot for O2O Wall-E operation
+(forked from https://github.com/rizqirizqi/benny)
 
 ## Owner
-O2O MVP Squad
+O2O Wall-E Squad
 
 ## Prerequisite
 1. Npm 4.2.0
 
+2. Google Spreadsheet Service Account API Config
+
 ## Installation
 1. Clone Benny
   ```
-  git clone https://github.com/azkidarmawan/benny.git
+  git clone https://github.com/rizqirizqi/benny.git
   cd benny
   ```
 2. Run
@@ -29,6 +32,6 @@ O2O MVP Squad
   ```
 3. Set webhook
   ```
-  curl -F "url=https://telegram-bot-xxxxxxxxxx.now.sh/new-message"  https://api.telegram.org/bot<your_api_token>/setWebhook
+  curl -F "url=https://telegram-bot-xxxxxxxxxx.now.sh/new-message" https://api.telegram.org/bot<your_api_token>/setWebhook
   ```
   Change 'xxxxxxxxxx' to deployed url character

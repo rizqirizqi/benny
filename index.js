@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -8,24 +10,54 @@ app.use(bodyParser.urlencoded({
   extended: true
 })); // for parsing application/x-www-form-urlencoded
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
 var start = new Date('2018-04-23');
 
 var GoogleSpreadsheet = require('google-spreadsheet');
-var creds = require('./client_secret.json');
+var creds = require('./client_secret.js');
 
 // Create a document object using the ID of the spreadsheet - obtained from its URL.
-var doc = new GoogleSpreadsheet('your_spreadsheet_id');
+var doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID);
 
 // API for send a message
-var sendMessageAPI = 'https://api.telegram.org/bot<your_bot_token>/sendMessage';
+var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
 
 // Bot Name
-var bot = 'eddy'
+var bot = process.env.BOT_NAME;
+
+var schedule = require('node-schedule');
+
+
+
+var registeredGroupId = null;
+
+var j = schedule.scheduleJob('30 14 * * *', function(){
+  console.log('Sending Standup Meeting reminder...');
+  axios.post(sendMessageAPI, {
+    chat_id: registeredGroupId,
+    text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
+  })
+});
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
-  const {message} = req.body
+  const { message } = req.body
+
+  if (typeof message.text === 'undefined') return res.send('OK');
+
+  if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
+    registeredGroupId = message.chat.id;
+    
+    axios.post(sendMessageAPI, {
+      chat_id: message.chat.id,
+      text: 'Registered! :D'
+    })
+  }
 
   if (message.text.toLowerCase().indexOf(bot) >= 0 && message.text.toLowerCase().indexOf('tolong') >= 0) {
     var help = message.text.toLowerCase().split("tolong");
@@ -47,17 +79,17 @@ app.post('/new-message', function(req, res) {
         }
         axios.post(sendMessageAPI, {
           chat_id: message.chat.id,
-          text: 'bro ' + cells[first].value + ' dan bro ' + cells[second].value + ' tolong' + talk[0]
+          text: 'mz/mb ' + cells[first].value + ' dan mz/mb ' + cells[second].value + ' tolong' + talk[0]
         })
         .then(response => {
           // We get here if the message was successfully posted
           console.log('Message posted')
-          res.end('ok')
+          res.send('OK')
         })
         .catch(err => {
           // ...and here if it was not
           console.log('Error :', err)
-          res.end('Error :' + err)
+          res.send('Error :' + err)
         })
       });
     });
@@ -81,7 +113,7 @@ app.post('/new-message', function(req, res) {
         }
         axios.post(sendMessageAPI, {
           chat_id: message.chat.id,
-          text: 'Pageeeee bro n sis! Utk minggu ini, engineer MVP yg bertugas adalah bro ' + cells[first].value + ' (PIC) dan bro ' + cells[second].value
+          text: 'On-Call Engineer Wall-E: ' + cells[first].value + ' (BE) dan ' + cells[second].value + ' (FE)'
         })
       });
     });
@@ -200,8 +232,6 @@ app.post('/new-message', function(req, res) {
           } else if (cells[1].value == 'Code Review 📜'){
             cells[1].setValue('QA Testing 🤔', function (err, c) {});
           } else if (cells[1].value == 'QA Testing 🤔'){
-            cells[1].setValue('Automation Testing 🔁', function (err, c) {});
-          } else if (cells[1].value == 'Automation Testing 🔁'){
             cells[1].setValue('Ready to Deploy 💡', function (err, c) {});
           } else if (cells[1].value == 'Ready to Deploy 💡'){
             cells[1].setValue('Merged 🔯', function (err, c) {});
@@ -250,8 +280,6 @@ app.post('/new-message', function(req, res) {
           } else if (cells[1].value == 'Merged 🔯'){
             cells[1].setValue('Ready to Deploy 💡', function (err, c) {});
           } else if (cells[1].value == 'Ready to Deploy 💡'){
-            cells[1].setValue('Automation Testing 🔁', function (err, c) {});
-          } else if (cells[1].value == 'Automation Testing 🔁'){
             cells[1].setValue('QA Testing 🤔', function (err, c) {});
           } else if (cells[1].value == 'QA Testing 🤔'){
             cells[1].setValue('Code Review 📜', function (err, c) {});
@@ -351,15 +379,22 @@ app.post('/new-message', function(req, res) {
     }
   }
 
+  if (message.text.toLowerCase().indexOf('/start') >= 0) {
+    axios.post(sendMessageAPI, {
+      chat_id: message.chat.id,
+      text: 'Halo teman-teman O2O Wall-E! :D',
+    })
+  }
+
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: 'Use <b>/add [task name]</b> to add new task\r\nUse <b>/done [task number] [PR link (optional)]</b> to move task to next step\r\nUse <b>/revert [task number]</b> to revert task one step\r\nUse <b>/fix [task number]</b> to revert task to development step\r\nUse <b>/link [task number] [PR link (optional)]</b> to show/update PR link\r\nUse <b>/development</b> to view all development status\r\nUse <b>/oncall</b> to view oncall Engineer\r\nAsk @azkidarmawan for more information',
+      text: 'Use <b>/add [task name]</b> to add new task\r\nUse <b>/done [task number] [PR link (optional)]</b> to move task to next step\r\nUse <b>/revert [task number]</b> to revert task one step\r\nUse <b>/fix [task number]</b> to revert task to development step\r\nUse <b>/link [task number] [PR link (optional)]</b> to show/update PR link\r\nUse <b>/development</b> to view all development status\r\nUse <b>/oncall</b> to view oncall Engineer\r\nAsk @mgsrizqi for more information',
       parse_mode: "HTML"
     })
   }
   
-  return res.end();
+  return res.send('OK');
 
 });
 
