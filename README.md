@@ -1,6 +1,6 @@
 # Benny
 Telegram Bot for O2O Wall-E operation
-(forked from https://github.com/rizqirizqi/benny)
+(forked from https://github.com/azkidarmawan/benny)
 
 ## Owner
 O2O Wall-E Squad
