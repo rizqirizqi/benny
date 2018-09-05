@@ -30,16 +30,18 @@ var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendM
 // Bot Name
 var bot = process.env.BOT_NAME;
 
-var schedule = require('node-schedule');
-// EVERYDAY 14:30
-var j = schedule.scheduleJob('30 14 * * *', function(){
-  console.log('Sending Standup Meeting reminder...');
+const storage = require('node-persist');
+storage.init();
+
+var CronJob = require('cron').CronJob;
+var job = new CronJob('00 30 14 * * 1-5', function() {
+  console.log('' + Date.now() + ' Sending Standup Meeting reminder... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
     if (registeredGroupId) {
       axios.post(sendMessageAPI, {
         chat_id: registeredGroupId,
-        text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
+        text: 'HEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️'
       })
       .catch(function(error) {
         console.warn('Register the group ID first!')
@@ -49,10 +51,7 @@ var j = schedule.scheduleJob('30 14 * * *', function(){
   .catch(function() {
     console.warn('ERROR HAPPENED WHILE SENDING A REMINDER!');
   })
-});
-
-const storage = require('node-persist');
-storage.init();
+}, null, true, 'Asia/Jakarta');
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
@@ -77,7 +76,9 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
-    var groupToRegister = message.chat.id;
+    var num = message.text.match(/register_standup_reminder@?.* (.*)/);
+    var groupId = num && num.length > 1 ? num[1] : '';
+    var groupToRegister = groupId || message.chat.id;
     storage.setItem('registeredGroupId', groupToRegister)
     .then(function() {
       axios.post(sendMessageAPI, {
