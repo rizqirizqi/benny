@@ -10,8 +10,8 @@ app.use(bodyParser.urlencoded({
   extended: true
 })); // for parsing application/x-www-form-urlencoded
 
-process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p);
+process.on('unhandledRejection', (reason) => {
+  console.log('Unhandled Rejection: ' + reason);
   // application specific logging, throwing an error, or other logic here
 });
 
@@ -34,11 +34,20 @@ var schedule = require('node-schedule');
 // EVERYDAY 14:30
 var j = schedule.scheduleJob('30 14 * * *', function(){
   console.log('Sending Standup Meeting reminder...');
-  storage.getItem('registeredGroupId').then(function(registeredGroupId) {
-    axios.post(sendMessageAPI, {
-      chat_id: registeredGroupId,
-      text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
-    })
+  storage.getItem('registeredGroupId')
+  .then(function(registeredGroupId) {
+    if (registeredGroupId) {
+      axios.post(sendMessageAPI, {
+        chat_id: registeredGroupId,
+        text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
+      })
+      .catch(function(error) {
+        console.warn('Register the group ID first!')
+      });
+    }
+  })
+  .catch(function() {
+    console.warn('ERROR HAPPENED WHILE SENDING A REMINDER!');
   })
 });
 
@@ -47,25 +56,40 @@ storage.init();
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
-  const { message } = req.body
+  const { message } = req.body;
 
   if (typeof message === 'undefined' || typeof message.text === 'undefined') return res.send('OK');
 
   if (message.text.toLowerCase().indexOf('/registered_group') >= 0) {
-    storage.getItem('registeredGroupId').then(function(registeredGroupId) {
+    storage.getItem('registeredGroupId')
+    .then(function(registeredGroupId) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: registeredGroupId
+        text: registeredGroupId || 'Nothing is registered.'
+      })
+    })
+    .catch(function(error) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: error
       })
     })
   }
 
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
     var groupToRegister = message.chat.id;
-    storage.setItem('registeredGroupId', groupToRegister);
-    axios.post(sendMessageAPI, {
-      chat_id: message.chat.id,
-      text: 'Registered! :D'
+    storage.setItem('registeredGroupId', groupToRegister)
+    .then(function() {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: 'Registered! :D'
+      })
+    })
+    .catch(function(error) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: error
+      })
     })
   }
 
