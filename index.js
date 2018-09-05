@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 
 process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  console.log('Unhandled Rejection at: Promise', p);
   // application specific logging, throwing an error, or other logic here
 });
 
@@ -31,18 +31,19 @@ var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendM
 var bot = process.env.BOT_NAME;
 
 var schedule = require('node-schedule');
-
-
-
-var registeredGroupId = null;
-
+// EVERYDAY 14:30
 var j = schedule.scheduleJob('30 14 * * *', function(){
   console.log('Sending Standup Meeting reminder...');
-  axios.post(sendMessageAPI, {
-    chat_id: registeredGroupId,
-    text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
+  storage.getItem('registeredGroupId').then(function(registeredGroupId) {
+    axios.post(sendMessageAPI, {
+      chat_id: registeredGroupId,
+      text: 'HEY BOD*T! CEPAT STANDUP! AYOOOOOO~~'
+    })
   })
 });
+
+const storage = require('node-persist');
+storage.init();
 
 //This is the route the API will call
 app.post('/new-message', function(req, res) {
@@ -50,9 +51,18 @@ app.post('/new-message', function(req, res) {
 
   if (typeof message === 'undefined' || typeof message.text === 'undefined') return res.send('OK');
 
+  if (message.text.toLowerCase().indexOf('/registered_group') >= 0) {
+    storage.getItem('registeredGroupId').then(function(registeredGroupId) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: registeredGroupId
+      })
+    })
+  }
+
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
-    registeredGroupId = message.chat.id;
-    
+    var groupToRegister = message.chat.id;
+    storage.setItem('registeredGroupId', groupToRegister);
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
       text: 'Registered! :D'
