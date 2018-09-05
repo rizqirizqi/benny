@@ -124,11 +124,13 @@ app.post('/new-message', function(req, res) {
     if (help.length < 2 || help[1] == "") {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: 'Use <b>/add [task name]</b> to add new task',
+        text: 'Use <b>/add [task name] [PR/JIRA link (optional)]</b> to add new task',
         parse_mode: "HTML"
       })
     } else {
-      var task = message.text.match(/add@?.* (.*)/);
+      var num = message.text.match(/add@?.* (.*) (.*)/);
+      var task = num && num.length > 1 ? num[1] : '';
+      var link = num && num.length > 2 ? num[2] : '-';
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -145,6 +147,11 @@ app.post('/new-message', function(req, res) {
               "return-empty": true
             }
             , function (err, cell) {
+            cells[2].setValue(link, function (err, c) {});
+            var prLink = '<i>no available link yet</i>';
+            if (cells[2].value != '-') {
+              prLink = '<a href=\"' + cells[2].value + '\">' + cells[2].value + '</a>';
+            }
             var d = new Date(Date.now()).toLocaleString();
             cell[0].setValue(task[1], function (err, cel) {});
             cell[1].setValue('In Progress ✍️', function (err, cel) {});
@@ -203,14 +210,13 @@ app.post('/new-message', function(req, res) {
     if (help.length < 2 || help[1] == "" || isNaN(help[1])) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: 'Use <b>/done [task number] [PR link (optional)]</b> to move task to next step',
+        text: 'Use <b>/done [task number] [PR/JIRA link (optional)]</b> to move task to next step',
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/done@?.* (.*)/);
-      var links = num[1].split(' ');
-      var number = links[0];
-      var link = '-';
+      var num = message.text.match(/done@?.* (.*) (.*)/);
+      var number = num && num.length > 1 ? num[1] : '';
+      var link = num && num.length > 2 ? num[2] : '-';
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -221,10 +227,7 @@ app.post('/new-message', function(req, res) {
             "max-col": 4
           }
           , function (err, cells) {
-          if (links.length > 1) {
-            link = links[1];
-            cells[2].setValue(link, function (err, c) {});
-          }
+          cells[2].setValue(link, function (err, c) {});
           var d = new Date(Date.now()).toLocaleString();
           cells[3].setValue(d, function (err, c) {});
           if (cells[1].value == 'In Progress ✍️'){
@@ -343,14 +346,13 @@ app.post('/new-message', function(req, res) {
     if (help.length < 2 || help[1] == "" || isNaN(help[1])) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: 'Use <b>/link [task number] [PR link (optional)]</b> to show/update PR link',
+        text: 'Use <b>/link [task number] [PR/JIRA link (optional)]</b> to show or update PR/JIRA link',
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/link@?.* (.*)/);
-      var links = num[1].split(' ');
-      var number = links[0];
-      var link = '-';
+      var num = message.text.match(/link@?.* (.*) (.*)/);
+      var number = num && num.length > 1 ? num[1] : '';
+      var link = num && num.length > 2 ? num[2] : '-';
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -361,10 +363,7 @@ app.post('/new-message', function(req, res) {
             "max-col": 3
           }
           , function (err, cells) {
-          if (links.length > 1) {
-            link = links[1];
-            cells[2].setValue(link, function (err, c) {});
-          }
+          cells[2].setValue(link, function (err, c) {});
           var prLink = '<i>no available link yet</i>';
           if (cells[2].value != '-') {
             prLink = '<a href=\"' + cells[2].value + '\">' + cells[2].value + '</a>';
@@ -389,7 +388,7 @@ app.post('/new-message', function(req, res) {
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: 'Use <b>/add [task name]</b> to add new task\r\nUse <b>/done [task number] [PR link (optional)]</b> to move task to next step\r\nUse <b>/revert [task number]</b> to revert task one step\r\nUse <b>/fix [task number]</b> to revert task to development step\r\nUse <b>/link [task number] [PR link (optional)]</b> to show/update PR link\r\nUse <b>/development</b> to view all development status\r\nUse <b>/oncall</b> to view oncall Engineer\r\nAsk @mgsrizqi for more information',
+      text: '<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to `in progress`\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n\r\nAsk @mgsrizqi for more information',
       parse_mode: "HTML"
     })
   }
