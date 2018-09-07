@@ -53,7 +53,13 @@ var job = new CronJob('00 30 14 * * 1-5', function() {
   })
 }, null, true, 'Asia/Jakarta');
 
-//This is the route the API will call
+
+// Health check
+app.get('/healthz', function(req, res) {
+  res.send('OK');
+});
+
+// This is the route the API will call
 app.post('/new-message', function(req, res) {
   const { message } = req.body;
 
