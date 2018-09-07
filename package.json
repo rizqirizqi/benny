@@ -1,12 +1,15 @@
 {
-  "name": "eddy-bot",
+  "name": "windibot",
   "version": "1.1.0",
-  "description": "o2o-mvp-telegram-bot",
+  "description": "o2o-walle-telegram-bot",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "author": "M. Azki Darmawan <azki.darmawan@bukalapak.com>",
+  "contributors": [
+    "Mgs. M. Rizqi F. <rizqi.fadhlurrahman@bukalapak.com>"
+  ],
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
