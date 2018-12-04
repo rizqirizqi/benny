@@ -169,7 +169,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/add@?.* (.*) (.*)/);
+      var num = message.text.match(/add@?\S* (.*) (.*)/);
       var task = num && num.length > 1 ? num[1] : '';
       var link = num && num.length > 2 ? num[2] : '-';
       // Authenticate with the Google Spreadsheets API.
@@ -188,15 +188,10 @@ app.post('/new-message', function(req, res) {
               "return-empty": true
             }
             , function (err, cell) {
-            // cells[2].setValue(link, function (err, c) {});
-            var prLink = '-';
-            if (cells[2].value != '-') {
-              prLink = '<a href=\"' + link + '\">' + link + '</a>';
-            }
             var d = new Date(Date.now()).toLocaleString();
-            cell[0].setValue(task[1], function (err, cel) {});
+            cell[0].setValue(task, function (err, cel) {});
             cell[1].setValue('In Progress ✍️', function (err, cel) {});
-            cell[2].setValue(prLink, function (err, cel) {});
+            cell[2].setValue(link, function (err, cel) {});
             cell[3].setValue(d, function (err, cel) {});
             cell[4].setValue(d, function (err, cel) {});
           });
