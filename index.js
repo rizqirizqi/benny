@@ -199,7 +199,7 @@ app.post('/new-message', function(req, res) {
       });
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: '<b>' + task[1] + '</b> has been added',
+        text: '<b>' + task + '</b> has been added',
         parse_mode: "HTML"
       })
     }
