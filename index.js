@@ -188,15 +188,15 @@ app.post('/new-message', function(req, res) {
               "return-empty": true
             }
             , function (err, cell) {
-            cells[2].setValue(link, function (err, c) {});
-            var prLink = '<i>no available link yet</i>';
+            // cells[2].setValue(link, function (err, c) {});
+            var prLink = '-';
             if (cells[2].value != '-') {
-              prLink = '<a href=\"' + cells[2].value + '\">' + cells[2].value + '</a>';
+              prLink = '<a href=\"' + link + '\">' + link + '</a>';
             }
             var d = new Date(Date.now()).toLocaleString();
             cell[0].setValue(task[1], function (err, cel) {});
             cell[1].setValue('In Progress ✍️', function (err, cel) {});
-            cell[2].setValue('-', function (err, cel) {});
+            cell[2].setValue(prLink, function (err, cel) {});
             cell[3].setValue(d, function (err, cel) {});
             cell[4].setValue(d, function (err, cel) {});
           });
