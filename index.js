@@ -82,7 +82,7 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
-    var num = message.text.match(/register_standup_reminder@?.* (.*)/);
+    var num = message.text.match(/register_standup_reminder@?\S* (.*)/);
     var groupId = num && num.length > 1 ? num[1] : '';
     var groupToRegister = groupId || message.chat.id;
     storage.setItem('registeredGroupId', groupToRegister)
@@ -170,8 +170,15 @@ app.post('/new-message', function(req, res) {
       })
     } else {
       var num = message.text.match(/add@?\S* (.*) (.*)/);
-      var task = num && num.length > 1 ? num[1] : '';
-      var link = num && num.length > 2 ? num[2] : '-';
+      var number = '';
+      var link = '-';
+      if (num) {
+        number = num && num.length > 1 ? num[1] : '';
+        link = num && num.length > 2 ? num[2] : '-';
+      } else {
+        num = message.text.match(/add@?\S* (.*)/);
+        number = num && num.length > 1 ? num[1] : '';
+      }
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -250,9 +257,16 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/done@?.* (.*) (.*)/);
-      var number = num && num.length > 1 ? num[1] : '';
-      var link = num && num.length > 2 ? num[2] : '-';
+      var num = message.text.match(/done@?\S* (.*) (.*)/);
+      var number = '';
+      var link = '-';
+      if (num) {
+        number = num && num.length > 1 ? num[1] : '';
+        link = num && num.length > 2 ? num[2] : '-';
+      } else {
+        num = message.text.match(/done@?\S* (.*)/);
+        number = num && num.length > 1 ? num[1] : '';
+      }
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
@@ -263,7 +277,7 @@ app.post('/new-message', function(req, res) {
             "max-col": 4
           }
           , function (err, cells) {
-          cells[2].setValue(link, function (err, c) {});
+          
           var d = new Date(Date.now()).toLocaleString();
           cells[3].setValue(d, function (err, c) {});
           if (cells[1].value == 'In Progress ✍️'){
@@ -277,13 +291,13 @@ app.post('/new-message', function(req, res) {
           } else {
             cells[1].setValue('DONE ✅', function (err, c) {});
           }
-          var prLink = cells[0].value;
-          if (cells[2].value != '-') {
-            prLink = '<a href=\"' + cells[2].value + '\">' + cells[0].value + '</a>';
+          if (link != '-') {
+            cells[2].setValue(link, function (err, c) {});
           }
+          var task = cells[0].value;
           axios.post(sendMessageAPI, {
             chat_id: message.chat.id,
-            text: prLink + ' <b>' + cells[1].value + '</b> now',
+            text: task + ' <b>' + cells[1].value + '</b> now',
             parse_mode: "HTML"
           })
         });
@@ -300,7 +314,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/revert@?.* (.*)/);
+      var num = message.text.match(/revert@?\S* (.*)/);
       var number = num[1];
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
@@ -348,7 +362,7 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/fix@?.* (.*)/);
+      var num = message.text.match(/fix@?\S* (.*)/);
       var number = num[1];
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
@@ -386,9 +400,16 @@ app.post('/new-message', function(req, res) {
         parse_mode: "HTML"
       })
     } else {
-      var num = message.text.match(/link@?.* (.*) (.*)/);
-      var number = num && num.length > 1 ? num[1] : '';
-      var link = num && num.length > 2 ? num[2] : '-';
+      var num = message.text.match(/link@?\S* (.*) (.*)/);
+      var number = '';
+      var link = '-';
+      if (num) {
+        number = num && num.length > 1 ? num[1] : '';
+        link = num && num.length > 2 ? num[2] : '-';
+      } else {
+        num = message.text.match(/link@?\S* (.*)/);
+        number = num && num.length > 1 ? num[1] : '';
+      }
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
         doc.getCells(1,
