@@ -170,14 +170,14 @@ app.post('/new-message', function(req, res) {
       })
     } else {
       var num = message.text.match(/add@?\S* (.*) (.*)/);
-      var number = '';
+      var task = '';
       var link = '-';
       if (num) {
-        number = num && num.length > 1 ? num[1] : '';
+        task = num && num.length > 1 ? num[1] : '';
         link = num && num.length > 2 ? num[2] : '-';
       } else {
         num = message.text.match(/add@?\S* (.*)/);
-        number = num && num.length > 1 ? num[1] : '';
+        task = num && num.length > 1 ? num[1] : '';
       }
       // Authenticate with the Google Spreadsheets API.
       doc.useServiceAccountAuth(creds, function (err) {
