@@ -24,17 +24,48 @@ var creds = require('./client_secret.js');
 // Create a document object using the ID of the spreadsheet - obtained from its URL.
 var doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID);
 
-// API for send a message
+// API
 var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
+var getTeamupTodayEvents = axios.create({
+  baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events`,
+  timeout: 5000,
+  headers: {'Teamup-Token': process.env.TEAMUP_API_KEY}
+});
 
 // Bot Name
 var bot = process.env.BOT_NAME;
+
+// SQUAD MEMBERS
+var SQUAD_MEMBERS = {
+  '@rianadw': ['riana'],
+  '@ochaadeea': ['ocha', 'zakina'],
+  '@ywardhana25': ['yayan', 'yulistian'],
+  '@mgsrizqi': ['mgsrizqi'],
+  '@williamlazuardi': ['william', 'lazuardi'],
+  '@liemhindrasanjaya': ['hindra'],
+  '@wahymaulana': ['wahyu'],
+  '@reditaliskiyari': ['redit'],
+  '@widyakumara': ['dewa'],
+  '@denisuswanto': ['deni', 'suswanto'],
+  '@zitanada': ['zita'],
+  '@nizwafay': ['papay', 'nizwa'],
+  '@dwitya_b': ['dwitya']
+}
+
+var SUBCALENDAR_IDS = {
+  3823675: 'cuti',
+  3823676: 'remote',
+  4461179: 'libur',
+  3824264: 'sakit',
+  3823674: 'GH'
+}
 
 const storage = require('node-persist');
 storage.init();
 
 var CronJob = require('cron').CronJob;
-var job = new CronJob('00 30 14 * * 1-5', function() {
+
+var standupJob = new CronJob('00 30 14 * * 1-5', function() {
   console.log('' + Date.now() + ' Sending Standup Meeting reminder... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -53,6 +84,58 @@ var job = new CronJob('00 30 14 * * 1-5', function() {
   })
 }, null, true, 'Asia/Jakarta');
 
+var attendanceJob = new CronJob('00 00 07 * * 1-5', function() {
+  console.log('' + Date.now() + ' Checking attendance... ');
+  storage.getItem('registeredGroupId')
+  .then(function(registeredGroupId) {
+    if (registeredGroupId) {
+      parseAttendance(registeredGroupId);
+    }
+  })
+  .catch(function() {
+    console.warn('ERROR HAPPENED WHILE CHECKING ATTENDANCE!');
+  })
+}, null, true, 'Asia/Jakarta');
+
+function parseAttendance(chatId) {
+  getTeamupTodayEvents.get()
+    .then(function(response) {
+      var events = response.data.events;
+      var memberInfo = '';
+      if (events.length > 0) {
+        for (var event of events) {
+          for (var member in SQUAD_MEMBERS) {
+            for (var nickname of SQUAD_MEMBERS[member]) {
+              if (event.title.toLowerCase().includes(nickname) || event.who.toLowerCase().includes(nickname)) {
+                for (var subid in SUBCALENDAR_IDS) {
+                  if (event.subcalendar_id === parseInt(subid)) {
+                    memberInfo += `${nickname} lagi ${SUBCALENDAR_IDS[subid]}\r\n`;
+                  }
+                }
+              }
+            }
+          }
+        }
+        axios.post(sendMessageAPI, {
+          chat_id: chatId,
+          text: `halo halo~\r\nhari ini\r\n${memberInfo}\r\njangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`,
+          parse_mode: 'HTML'
+        })
+      }
+      else {
+        axios.post(sendMessageAPI, {
+          chat_id: chatId,
+          text: 'Semua teman-teman O2O Wall-E available yeay~'
+        })
+      }
+    })
+    .catch(function(error) {
+      axios.post(sendMessageAPI, {
+        chat_id: chatId,
+        text: 'Ada error masa :( kabarin @mgsrizqi yaa~'
+      })
+    })
+}
 
 // Health check
 app.get('/healthz', function(req, res) {
@@ -79,6 +162,10 @@ app.post('/new-message', function(req, res) {
         text: error
       })
     })
+  }
+
+  if (message.text.toLowerCase().indexOf('/attendance') >= 0) {
+    parseAttendance(message.chat.id);
   }
 
   if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
