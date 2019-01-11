@@ -84,7 +84,7 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
   })
 }, null, true, 'Asia/Jakarta');
 
-var attendanceJob = new CronJob('00 00 07 * * 1-5', function() {
+var attendanceJob = new CronJob('00 00 08 * * 1-5', function() {
   console.log('' + Date.now() + ' Checking attendance... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -102,6 +102,7 @@ function parseAttendance(chatId) {
     .then(function(response) {
       var events = response.data.events;
       var memberInfo = '';
+      var botMessage = '';
       if (events.length > 0) {
         for (var event of events) {
           for (var member in SQUAD_MEMBERS) {
@@ -109,25 +110,26 @@ function parseAttendance(chatId) {
               if (event.title.toLowerCase().includes(nickname) || event.who.toLowerCase().includes(nickname)) {
                 for (var subid in SUBCALENDAR_IDS) {
                   if (event.subcalendar_id === parseInt(subid)) {
-                    memberInfo += `${nickname} lagi ${SUBCALENDAR_IDS[subid]}\r\n`;
+                    memberInfo += ` *${nickname.charAt(0).toUpperCase() + nickname.slice(1)}* lagi *${SUBCALENDAR_IDS[subid]}*,`;
                   }
                 }
               }
             }
           }
         }
-        axios.post(sendMessageAPI, {
-          chat_id: chatId,
-          text: `halo halo~\r\nhari ini\r\n${memberInfo}\r\njangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`,
-          parse_mode: 'HTML'
-        })
+        if (memberInfo) {
+          botMessage = `Halo halo~\r\nHari ini${memberInfo} jangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`;
+        } else {
+          botMessage = 'Halo halo~\r\nHari ini semua teman-teman O2O Wall-E available yeay~';
+        }
       }
       else {
-        axios.post(sendMessageAPI, {
-          chat_id: chatId,
-          text: 'Semua teman-teman O2O Wall-E available yeay~'
-        })
+        botMessage = 'Halo halo~\r\nHari ini semua teman-teman O2O Wall-E available yeay~';
       }
+      axios.post(sendMessageAPI, {
+        chat_id: chatId,
+        text: botMessage
+      })
     })
     .catch(function(error) {
       axios.post(sendMessageAPI, {
