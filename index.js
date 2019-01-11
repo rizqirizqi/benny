@@ -128,7 +128,8 @@ function parseAttendance(chatId) {
       }
       axios.post(sendMessageAPI, {
         chat_id: chatId,
-        text: botMessage
+        text: botMessage,
+        parse_mode: "Markdown"
       })
     })
     .catch(function(error) {
