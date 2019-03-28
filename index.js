@@ -45,11 +45,11 @@ var SQUAD_MEMBERS = {
   '@liemhindrasanjaya': ['hindra'],
   '@wahymaulana': ['wahyu'],
   '@reditaliskiyari': ['redit'],
+  '@nizwafay': ['papay', 'nizwa'],
+  '@dwitya_b': ['dwitya'],
   '@widyakumara': ['dewa'],
   '@denisuswanto': ['deni', 'suswanto'],
-  '@zitanada': ['zita'],
-  '@nizwafay': ['papay', 'nizwa'],
-  '@dwitya_b': ['dwitya']
+  '@zitanada': ['zita']
 }
 
 var SUBCALENDAR_IDS = {
@@ -70,13 +70,38 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
     if (registeredGroupId) {
-      axios.post(sendMessageAPI, {
-        chat_id: registeredGroupId,
-        text: 'HEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️'
-      })
-      .catch(function(error) {
-        console.warn('Register the group ID first!')
-      });
+      var standupAnnouncement = 'HEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️'
+      getTeamupTodayEvents.get()
+        .then(function(response) {
+          var events = response.data.events;
+          var memberNotAvailable = ['@widyakumara', '@denisuswanto', '@zitanada'];
+          if (events.length > 0) {
+            for (var event of events) {
+              for (var member in SQUAD_MEMBERS) {
+                for (var nickname of SQUAD_MEMBERS[member]) {
+                  if (event.title.toLowerCase().includes(nickname) || event.who.toLowerCase().includes(nickname)) {
+                    var notAvailableTypes = [3823675, 4461179, 3824264, 3823674];
+                    if (notAvailableTypes.includes(event.subcalendar_id)) {
+                      memberNotAvailable.push(member);
+                    }
+                  }
+                }
+              }
+            }
+            for (var member in SQUAD_MEMBERS) {
+              if (!memberNotAvailable.includes(member)) {
+                standupAnnouncement += `\r\n${memberInfo}`;
+              }
+            }
+          }
+          axios.post(sendMessageAPI, {
+            chat_id: registeredGroupId,
+            text: standupAnnouncement
+          })
+        })
+        .catch(function(error) {
+          console.warn('Register the group ID first!')
+        });
     }
   })
   .catch(function() {
