@@ -75,12 +75,12 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
         .then(function(response) {
           var events = response.data.events;
           var memberNotAvailable = ['@widyakumara', '@denisuswanto', '@zitanada'];
+          var notAvailableTypes = [3823675, 4461179, 3824264, 3823674];
           if (events.length > 0) {
             for (var event of events) {
               for (var member in SQUAD_MEMBERS) {
                 for (var nickname of SQUAD_MEMBERS[member]) {
                   if (event.title.toLowerCase().includes(nickname) || event.who.toLowerCase().includes(nickname)) {
-                    var notAvailableTypes = [3823675, 4461179, 3824264, 3823674];
                     if (notAvailableTypes.includes(event.subcalendar_id)) {
                       memberNotAvailable.push(member);
                     }
@@ -88,10 +88,10 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
                 }
               }
             }
-            for (var member in SQUAD_MEMBERS) {
-              if (!memberNotAvailable.includes(member)) {
-                standupAnnouncement += `\r\n${member}`;
-              }
+          }
+          for (var member in SQUAD_MEMBERS) {
+            if (!memberNotAvailable.includes(member)) {
+              standupAnnouncement += `\r\n${member}`;
             }
           }
           axios.post(sendMessageAPI, {
