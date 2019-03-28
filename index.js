@@ -90,7 +90,7 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
             }
             for (var member in SQUAD_MEMBERS) {
               if (!memberNotAvailable.includes(member)) {
-                standupAnnouncement += `\r\n${memberInfo}`;
+                standupAnnouncement += `\r\n${member}`;
               }
             }
           }
