@@ -37,18 +37,20 @@ var bot = process.env.BOT_NAME;
 
 // SQUAD MEMBERS
 var SQUAD_MEMBERS = {
-  '@rianadw': ['riana'],
-  '@ochaadeea': ['ocha', 'zakina'],
-  '@ywardhana25': ['yayan', 'yulistian'],
-  '@mgsrizqi': ['mgsrizqi'],
-  '@williamlazuardi': ['william', 'lazuardi'],
-  '@liemhindrasanjaya': ['hindra'],
-  '@wahymaulana': ['wahyu'],
-  '@reditaliskiyari': ['redit'],
-  '@nizwafay': ['papay', 'nizwa'],
-  '@dwitya_b': ['dwitya'],
-  '@widyakumara': ['dewa'],
+  '@andi_h': ['andi'],
   '@denisuswanto': ['deni', 'suswanto'],
+  '@dwitya_b': ['dwitya'],
+  '@liemhindrasanjaya': ['hindra'],
+  '@mgsrizqi': ['mgsrizqi'],
+  '@nizwafay': ['papay', 'nizwa'],
+  '@ochaadeea': ['ocha', 'zakina'],
+  '@PhantomX7': ['kenichi'],
+  '@reditaliskiyari': ['redit'],
+  '@rianadw': ['riana'],
+  '@wahymaulana': ['wahyu'],
+  '@widyakumara': ['dewa'],
+  '@williamlazuardi': ['william', 'lazuardi'],
+  '@ywardhana25': ['yayan', 'yulistian'],
   '@zitanada': ['zita']
 }
 
