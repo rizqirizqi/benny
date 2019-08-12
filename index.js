@@ -227,12 +227,12 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/start_group') >= 0) {
-    if (message.from.username !== BOT_ADMIN) {
+    if (`@${message.from.username}` !== BOT_ADMIN) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text: `Maaf kak, cuma kak ${BOT_ADMIN} yg bisa ngestart group, hehe`
       })
-      return
+      return res.send('OK');
     }
     var num = message.text.match(/start_group@?\S* (.*)/);
     var groupId = num && num.length > 1 ? num[1] : '';
