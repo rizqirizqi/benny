@@ -552,7 +552,7 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/start') >= 0) {
-    if (SQUAD_MEMBERS.includes(message.from.username)) {
+    if (Object.keys(SQUAD_MEMBERS).includes(`@${message.from.username}`)) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text: `Halo ${message.from.first_name}! Kenalin, aku WindiBot, yg bakal nemenin kamu selama kamu berada di squad ${SQUAD_NAME}! :D`,
