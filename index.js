@@ -35,24 +35,52 @@ var getTeamupTodayEvents = axios.create({
 // Bot Name
 var bot = process.env.BOT_NAME;
 
+var BOT_ADMIN = '@mgsrizqi'
+
+var SQUAD_NAME = 'O2O-Mitra'
+
 // SQUAD MEMBERS
 var SQUAD_MEMBERS = {
+  '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
-  '@denisuswanto': ['deni', 'suswanto'],
-  '@dwitya_b': ['dwitya'],
+  '@ayynurp': ['aya', 'wayan'],
+  '@benyliantriana': ['beny'],
+  '@damaera': ['luthfi', 'damaera'],
+  '@dimasdanz': ['dimas'],
+  '@dendynp': ['dendy'],
+  '@fadilmuhput': ['fadil'],
+  '@faroukrizki': ['farouk'],
+  '@ifanasution': ['ifa'],
+  '@Iqbalmabbit': ['mabbit'],
+  '@juan_anton': ['juan'],
   '@liemhindrasanjaya': ['hindra'],
   '@mgsrizqi': ['mgsrizqi'],
   '@nizwafay': ['papay', 'nizwa'],
   '@ochaadeea': ['ocha', 'zakina'],
   '@PhantomX7': ['kenichi'],
+  '@rahmisr': ['rahmi'],
+  '@rahmatrasyidi': ['rasyidi'],
   '@reditaliskiyari': ['redit'],
   '@rianadw': ['riana'],
+  '@rynaldoryan': ['ryan'],
+  '@ucupsaklek': ['ucup'],
   '@wahymaulana': ['wahyu'],
   '@widyakumara': ['dewa'],
   '@williamlazuardi': ['william', 'lazuardi'],
+  '@windiany': ['windi'],
   '@ywardhana25': ['yayan', 'yulistian'],
   '@zitanada': ['zita']
 }
+
+WATER_TRIBE_MEMBER = [
+  '@anansyahsaiful',
+  '@ifanasution',
+  '@Iqbalmabbit',
+  '@wahymaulana',
+  '@widyakumara',
+  '@windiany',
+  '@zitanada'
+]
 
 var SUBCALENDAR_IDS = {
   3823675: 'cuti',
@@ -67,7 +95,7 @@ storage.init();
 
 var CronJob = require('cron').CronJob;
 
-var standupJob = new CronJob('00 30 14 * * 1-5', function() {
+var standupJob = new CronJob('00 30 11 * * 1-5', function() {
   console.log('' + Date.now() + ' Sending Standup Meeting reminder... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -76,7 +104,7 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
       getTeamupTodayEvents.get()
         .then(function(response) {
           var events = response.data.events;
-          var memberNotAvailable = ['@widyakumara', '@denisuswanto', '@zitanada'];
+          var memberNotAvailable = [...WATER_TRIBE_MEMBER];
           var notAvailableTypes = [3823675, 4461179, 3824264, 3823674];
           if (events.length > 0) {
             for (var event of events) {
@@ -111,7 +139,7 @@ var standupJob = new CronJob('00 30 14 * * 1-5', function() {
   })
 }, null, true, 'Asia/Jakarta');
 
-var attendanceJob = new CronJob('00 00 08 * * 1-5', function() {
+var attendanceJob = new CronJob('00 00 09 * * 1-5', function() {
   console.log('' + Date.now() + ' Checking attendance... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -147,11 +175,11 @@ function parseAttendance(chatId) {
         if (memberInfo) {
           botMessage = `Halo halo~\r\nHari ini${memberInfo} jangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`;
         } else {
-          botMessage = 'Halo halo~\r\nHari ini semua teman-teman O2O Wall-E available yeay~';
+          botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
         }
       }
       else {
-        botMessage = 'Halo halo~\r\nHari ini semua teman-teman O2O Wall-E available yeay~';
+        botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
       }
       axios.post(sendMessageAPI, {
         chat_id: chatId,
@@ -198,8 +226,15 @@ app.post('/new-message', function(req, res) {
     parseAttendance(message.chat.id);
   }
 
-  if (message.text.toLowerCase().indexOf('/register_standup_reminder') >= 0) {
-    var num = message.text.match(/register_standup_reminder@?\S* (.*)/);
+  if (message.text.toLowerCase().indexOf('/start_group') >= 0) {
+    if (message.from.username !== BOT_ADMIN) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: `Maaf kak, cuma kak ${BOT_ADMIN} yg bisa ngestart group, hehe`
+      })
+      return
+    }
+    var num = message.text.match(/start_group@?\S* (.*)/);
     var groupId = num && num.length > 1 ? num[1] : '';
     var groupToRegister = groupId || message.chat.id;
     storage.setItem('registeredGroupId', groupToRegister)
@@ -215,42 +250,6 @@ app.post('/new-message', function(req, res) {
         text: error
       })
     })
-  }
-
-  if (message.text.toLowerCase().indexOf(bot) >= 0 && message.text.toLowerCase().indexOf('tolong') >= 0) {
-    var help = message.text.toLowerCase().split("tolong");
-    var talk = help[1].split(bot);
-    // Authenticate with the Google Spreadsheets API.
-    doc.useServiceAccountAuth(creds, function (err) {
-      // Get the cells from the first row of the spreadsheet.
-      doc.getCells(1,
-        {
-          "max-row": 1
-        }
-        , function (err, cells) {
-        var d = new Date(Date.now());
-        var diffDays = Math.round(Math.abs((d.getTime() - start.getTime())/(oneDay)));
-        var first = parseInt(diffDays / 7) % cells.length;
-        var second = parseInt(diffDays / 7) % cells.length + 1;
-        if (second == cells.length) {
-          second = 0;
-        }
-        axios.post(sendMessageAPI, {
-          chat_id: message.chat.id,
-          text: 'mz/mb ' + cells[first].value + ' dan mz/mb ' + cells[second].value + ' tolong' + talk[0]
-        })
-        .then(response => {
-          // We get here if the message was successfully posted
-          console.log('Message posted')
-          res.send('OK')
-        })
-        .catch(err => {
-          // ...and here if it was not
-          console.log('Error :', err)
-          res.send('Error :' + err)
-        })
-      });
-    });
   }
 
   if (message.text.toLowerCase().indexOf('/oncall') >= 0) {
@@ -271,7 +270,7 @@ app.post('/new-message', function(req, res) {
         }
         axios.post(sendMessageAPI, {
           chat_id: message.chat.id,
-          text: 'On-Call Engineer Wall-E: ' + cells[first].value + ' (BE) dan ' + cells[second].value + ' (FE)'
+          text: `On-Call Engineers ${SQUAD_NAME}: ${cells[first].value} dan ${cells[second].value}`
         })
       });
     });
@@ -553,10 +552,17 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/start') >= 0) {
-    axios.post(sendMessageAPI, {
-      chat_id: message.chat.id,
-      text: 'Halo teman-teman O2O Wall-E! :D',
-    })
+    if (SQUAD_MEMBERS.includes(message.from.username)) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: `Halo ${message.from.first_name}! Kenalin, aku WindiBot, yg bakal nemenin kamu selama kamu berada di squad ${SQUAD_NAME}! :D`,
+      })
+    } else {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: `Halo ${message.from.first_name}! Ada apa ya? Kabarin kak ${BOT_ADMIN} ya kalo ada apa-apa :)`,
+      })
+    }
   }
 
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
