@@ -28,10 +28,10 @@ O2O-Mitra Squad
   ```
 2. Run `now` service
   ```
-  now --public -e PRIVATE_KEY_ID= -e BOT_TOKEN= -e BOT_NAME=WindiBot -e SPREADSHEET_ID= -e TEAMUP_CALENDAR_KEY= -e TEAMUP_API_KEY=
+  now --public -e BOT_NAME=WindiBot -e PRIVATE_KEY_ID= -e BOT_TOKEN= -e SPREADSHEET_ID= -e TEAMUP_CALENDAR_KEY= -e TEAMUP_API_KEY=
   ```
 3. Set webhook
   ```
-  curl -F "url=https://telegram-bot-xxxxxxxxxx.now.sh/new-message" https://api.telegram.org/bot<your_api_token>/setWebhook
+  curl -F "url=https://xxxxx.now.sh/new-message" https://api.telegram.org/bot<your_api_token>/setWebhook
   ```
-  Change 'xxxxxxxxxx' to deployed url character
+  Change 'xxxxx' to deployed url character
