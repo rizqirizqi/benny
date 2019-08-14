@@ -28,7 +28,7 @@ O2O-Mitra Squad
   ```
 2. Run `now` service
   ```
-  now
+  now --public -e PRIVATE_KEY_ID= -e BOT_TOKEN= -e BOT_NAME=WindiBot -e SPREADSHEET_ID= -e TEAMUP_CALENDAR_KEY= -e TEAMUP_API_KEY=
   ```
 3. Set webhook
   ```
