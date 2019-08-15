@@ -39,7 +39,7 @@ var BOT_ADMIN = '@mgsrizqi'
 
 var SQUAD_NAME = 'O2O-Mitra'
 
-// SQUAD MEMBERS
+// FULL SQUAD MEMBERS
 var SQUAD_MEMBERS = {
   '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
@@ -71,11 +71,11 @@ var SQUAD_MEMBERS = {
   '@ywardhana25': ['yayan', 'yulistian'],
   '@zitanada': ['zita']
 }
-
 WATER_TRIBE_MEMBER = [
   '@anansyahsaiful',
   '@ifanasution',
   '@Iqbalmabbit',
+  '@ucupsaklek',
   '@wahymaulana',
   '@widyakumara',
   '@windiany',
@@ -95,7 +95,7 @@ storage.init();
 
 var CronJob = require('cron').CronJob;
 
-var standupJob = new CronJob('00 30 11 * * 1-5', function() {
+var standupJob = function() {
   console.log('' + Date.now() + ' Sending Standup Meeting reminder... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -137,9 +137,8 @@ var standupJob = new CronJob('00 30 11 * * 1-5', function() {
   .catch(function() {
     console.warn('ERROR HAPPENED WHILE SENDING A REMINDER!');
   })
-}, null, true, 'Asia/Jakarta');
-
-var attendanceJob = new CronJob('00 00 09 * * 1-5', function() {
+}
+var attendanceJob = function() {
   console.log('' + Date.now() + ' Checking attendance... ');
   storage.getItem('registeredGroupId')
   .then(function(registeredGroupId) {
@@ -150,14 +149,19 @@ var attendanceJob = new CronJob('00 00 09 * * 1-5', function() {
   .catch(function() {
     console.warn('ERROR HAPPENED WHILE CHECKING ATTENDANCE!');
   })
-}, null, true, 'Asia/Jakarta');
+}
+var crons = {
+  standup14: new CronJob('00 30 11 * * 1-4', standupJob, null, true, 'Asia/Jakarta'),
+  standup5: new CronJob('00 00 11 * * 5', standupJob, null, true, 'Asia/Jakarta'),
+  attendance: new CronJob('00 00 09 * * 1-5', attendanceJob, null, true, 'Asia/Jakarta'),
+}
 
 function parseAttendance(chatId) {
   getTeamupTodayEvents.get()
     .then(function(response) {
       var events = response.data.events;
       var memberInfo = '';
-      var botMessage = '';
+      var botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
       if (events.length > 0) {
         for (var event of events) {
           for (var member in SQUAD_MEMBERS) {
@@ -174,12 +178,7 @@ function parseAttendance(chatId) {
         }
         if (memberInfo) {
           botMessage = `Halo halo~\r\nHari ini${memberInfo} jangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`;
-        } else {
-          botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
         }
-      }
-      else {
-        botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
       }
       axios.post(sendMessageAPI, {
         chat_id: chatId,
@@ -190,7 +189,7 @@ function parseAttendance(chatId) {
     .catch(function(error) {
       axios.post(sendMessageAPI, {
         chat_id: chatId,
-        text: 'Ada error masa :( kabarin @mgsrizqi yaa~'
+        text: `Ada error masa :( kabarin ${BOT_ADMIN} yaa~`
       })
     })
 }
@@ -568,7 +567,7 @@ app.post('/new-message', function(req, res) {
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: '<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to `in progress`\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n\r\nAsk @mgsrizqi for more information',
+      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to `in progress`\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n\r\nAsk ${BOT_ADMIN} for more information`,
       parse_mode: "HTML"
     })
   }
