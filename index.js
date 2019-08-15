@@ -567,7 +567,7 @@ app.post('/new-message', function(req, res) {
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to `in progress`\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n\r\nAsk ${BOT_ADMIN} for more information`,
+      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n\r\nAsk ${BOT_ADMIN} for more information`,
       parse_mode: "HTML"
     })
   }
