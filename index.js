@@ -372,8 +372,8 @@ app.post('/new-message', function(req, res) {
               if (cell[index+2].value != '-') {
                 prLink = '<a href=\"' + cell[index+2].value + '\">' + cell[index].value + '</a>';
               }
-              const assignee = issues[index].assignee.name
-              development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> (${assignee})\r\n'`);
+              const assignee = issues[index] ? `(${issues[index].assignee.name})` : ''
+              development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> ${assignee}\r\n'`);
               number++;
             }
             axios.post(sendMessageAPI, {
