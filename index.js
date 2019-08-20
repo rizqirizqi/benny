@@ -27,21 +27,18 @@ var doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID);
 // API
 var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
 var getTeamupTodayEvents = axios.create({
-  method: 'GET',
   baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events`,
-  timeout: 5000,
+  timeout: 10000,
   headers: {'Teamup-Token': process.env.TEAMUP_API_KEY}
 });
 var getJiraIssue = issueKey => axios.create({
-  method: 'GET',
   baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
-  timeout: 5000,
+  timeout: 10000,
   headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`}
 });
 var editJiraIssue = (issueKey, data) => axios.create({
-  method: 'PUT',
   baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
-  timeout: 5000,
+  timeout: 10000,
   headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`},
   data
 });
@@ -361,8 +358,8 @@ app.post('/new-message', function(req, res) {
           const jiraIssues = []
           for (let index = 0; index < cell.length; index+=3) {
             const jiraIssueKey = cell[index].value.match(/[A-Z]+\-\d+/g)
-            if (jiraIssueKey) {
-              jiraIssues[index] = getJiraIssue(jiraIssueKey)
+            if ((jiraIssueKey || []).length > 0) {
+              jiraIssues[index] = getJiraIssue(jiraIssueKey[0]).get()
             }
           }
           var number = 1;
@@ -372,7 +369,7 @@ app.post('/new-message', function(req, res) {
               if (cell[index+2].value != '-') {
                 prLink = '<a href=\"' + cell[index+2].value + '\">' + cell[index].value + '</a>';
               }
-              const assignee = issues[index] ? `(${issues[index].assignee.name})` : ''
+              const assignee = ((issues[index] || {}).fields || {}).assignee ? `(${issues[index].fields.assignee.displayName})` : ''
               development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> ${assignee}\r\n`);
               number++;
             }
@@ -380,6 +377,11 @@ app.post('/new-message', function(req, res) {
               chat_id: message.chat.id,
               text: 'Status Development:\r\n' + development,
               parse_mode: "HTML"
+            })
+          }).catch(err => {
+            axios.post(sendMessageAPI, {
+              chat_id: message.chat.id,
+              text: `Ada error masa :( kabarin ${BOT_ADMIN} yaa~`
             })
           })
         });
