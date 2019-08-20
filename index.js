@@ -27,9 +27,23 @@ var doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID);
 // API
 var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
 var getTeamupTodayEvents = axios.create({
+  method: 'GET',
   baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events`,
   timeout: 5000,
   headers: {'Teamup-Token': process.env.TEAMUP_API_KEY}
+});
+var getJiraIssue = issueKey => axios.create({
+  method: 'GET',
+  baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
+  timeout: 5000,
+  headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`}
+});
+var editJiraIssue = (issueKey, data) => axios.create({
+  method: 'PUT',
+  baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
+  timeout: 5000,
+  headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`},
+  data
 });
 
 // Bot Name
@@ -344,19 +358,29 @@ app.post('/new-message', function(req, res) {
             "max-col": 3
           }
           , function (err, cell) {
-          var number = 1;
+          const jiraIssues = []
           for (let index = 0; index < cell.length; index+=3) {
-            var prLink = cell[index].value;
-            if (cell[index+2].value != '-') {
-              prLink = '<a href=\"' + cell[index+2].value + '\">' + cell[index].value + '</a>';
+            const jiraIssueKey = cell[index+1].value.match(/[A-Z]+\-\d+/g)
+            if (jiraIssueKey) {
+              jiraIssues[index] = getJiraIssue(jiraIssueKey)
             }
-            development = development.concat(number + '. ' + prLink + ' <b>' + cell[index+1].value + '</b>\r\n');
-            number++;
           }
-          axios.post(sendMessageAPI, {
-            chat_id: message.chat.id,
-            text: 'Status Development:\r\n' + development,
-            parse_mode: "HTML"
+          var number = 1;
+          Promise.all(jiraIssues.map(x => x.then(y=>y.data || {}))).then(issues => {
+            for (let index = 0; index < cell.length; index+=3) {
+              var prLink = cell[index].value;
+              if (cell[index+2].value != '-') {
+                prLink = '<a href=\"' + cell[index+2].value + '\">' + cell[index].value + '</a>';
+              }
+              const assignee = issues[index].assignee.name
+              development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> (${assignee})\r\n'`);
+              number++;
+            }
+            axios.post(sendMessageAPI, {
+              chat_id: message.chat.id,
+              text: 'Status Development:\r\n' + development,
+              parse_mode: "HTML"
+            })
           })
         });
       });
