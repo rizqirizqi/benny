@@ -366,14 +366,15 @@ app.post('/new-message', function(req, res) {
             }
           }
           var number = 1;
-          Promise.all(jiraIssues.map(x => x.then(y=>y.data || {}))).then(issues => {
+          Promise.all(jiraIssues.map(x => x.then(y=>y.data))).then(issues => {
+            console.log(issues)
             for (let index = 0; index < cell.length; index+=3) {
               var prLink = cell[index].value;
               if (cell[index+2].value != '-') {
                 prLink = '<a href=\"' + cell[index+2].value + '\">' + cell[index].value + '</a>';
               }
               const assignee = issues[index] ? `(${issues[index].assignee.name})` : ''
-              development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> ${assignee}\r\n'`);
+              development = development.concat(`${number}. ${prLink} <b>${cell[index+1].value}</b> ${assignee}\r\n`);
               number++;
             }
             axios.post(sendMessageAPI, {
