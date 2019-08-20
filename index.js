@@ -360,14 +360,13 @@ app.post('/new-message', function(req, res) {
           , function (err, cell) {
           const jiraIssues = []
           for (let index = 0; index < cell.length; index+=3) {
-            const jiraIssueKey = cell[index+1].value.match(/[A-Z]+\-\d+/g)
+            const jiraIssueKey = cell[index].value.match(/[A-Z]+\-\d+/g)
             if (jiraIssueKey) {
               jiraIssues[index] = getJiraIssue(jiraIssueKey)
             }
           }
           var number = 1;
           Promise.all(jiraIssues.map(x => x.then(y=>y.data))).then(issues => {
-            console.log(issues)
             for (let index = 0; index < cell.length; index+=3) {
               var prLink = cell[index].value;
               if (cell[index+2].value != '-') {
