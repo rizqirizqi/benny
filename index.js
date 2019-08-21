@@ -286,7 +286,7 @@ app.post('/new-message', function(req, res) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text:
-          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create or update Teamup event\r\nEx: /ijin remote today",
+          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
         parse_mode: "HTML"
       })
       return res.send("OK")
@@ -306,7 +306,7 @@ app.post('/new-message', function(req, res) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text:
-          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create or update Teamup event\r\nEx: /ijin remote today",
+          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
         parse_mode: "HTML"
       })
       return res.send("OK")
@@ -691,7 +691,7 @@ app.post('/new-message', function(req, res) {
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n<b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b>: create or update Teamup event\r\n\r\nAsk ${BOT_ADMIN} for more information`,
+      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n<b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b>: create Teamup event\r\n\r\nAsk ${BOT_ADMIN} for more information`,
       parse_mode: "HTML"
     })
   }
