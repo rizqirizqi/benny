@@ -26,22 +26,43 @@ var doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID);
 
 // API
 var sendMessageAPI = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
-var getTeamupTodayEvents = axios.create({
+var getTeamupTodayEvents = () => axios.create({
+  method: 'get',
   baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events`,
   timeout: 10000,
   headers: {'Teamup-Token': process.env.TEAMUP_API_KEY}
+});
+var createTeamupEvent = data => axios.create({
+  method: 'post',
+  baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events`,
+  timeout: 10000,
+  headers: {'Teamup-Token': process.env.TEAMUP_API_KEY},
+  data
+});
+var updateTeamupEvent = (eventId, data) => axios.create({
+  method: 'put',
+  baseURL: `https://api.teamup.com/${process.env.TEAMUP_CALENDAR_KEY}/events/${eventId}`,
+  timeout: 10000,
+  headers: {'Teamup-Token': process.env.TEAMUP_API_KEY},
+  data
 });
 var getJiraIssue = issueKey => axios.create({
   baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
   timeout: 10000,
   headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`}
 });
-var editJiraIssue = (issueKey, data) => axios.create({
+var setJiraIssue = (issueKey, data) => axios.create({
   baseURL: `${process.env.JIRA_URL}/rest/api/3/issue/${issueKey}`,
   timeout: 10000,
   headers: {'Authorization': `Basic ${process.env.JIRA_API_KEY}`},
   data
 });
+
+// Helpers
+const getKeyByValue = (obj, value) =>
+  Object.keys(obj).find(key => obj[key] === value)
+const capitalize = text => text.charAt(0).toUpperCase() + text.slice(1)
+const dateRegex = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/
 
 // Bot Name
 var bot = process.env.BOT_NAME;
@@ -112,7 +133,7 @@ var standupJob = function() {
   .then(function(registeredGroupId) {
     if (registeredGroupId) {
       var standupAnnouncement = 'HEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️\r\nHEY‼️‼️‼️ AYOO~ STANDUP‼️‼️‼️'
-      getTeamupTodayEvents.get()
+      getTeamupTodayEvents().request()
         .then(function(response) {
           var events = response.data.events;
           var memberNotAvailable = [...WATER_TRIBE_MEMBER];
@@ -167,20 +188,25 @@ var crons = {
   attendance: new CronJob('00 00 09 * * 1-5', attendanceJob, null, true, 'Asia/Jakarta'),
 }
 
-function parseAttendance(chatId) {
-  getTeamupTodayEvents.get()
+const parseAttendance = chatId => {
+  getTeamupTodayEvents()
+    .request()
     .then(function(response) {
-      var events = response.data.events;
-      var memberInfo = '';
-      var botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`;
+      var events = response.data.events
+      var memberInfo = ""
+      var botMessage = `Halo halo~\r\nHari ini semua teman-teman ${SQUAD_NAME} available yeay~`
       if (events.length > 0) {
         for (var event of events) {
           for (var member in SQUAD_MEMBERS) {
             for (var nickname of SQUAD_MEMBERS[member]) {
-              if (event.title.toLowerCase().includes(nickname) || event.who.toLowerCase().includes(nickname)) {
+              if (
+                event.title.toLowerCase().includes(nickname) ||
+                event.who.toLowerCase().includes(nickname)
+              ) {
                 for (var subid in SUBCALENDAR_IDS) {
                   if (event.subcalendar_id === parseInt(subid)) {
-                    memberInfo += ` *${nickname.charAt(0).toUpperCase() + nickname.slice(1)}* lagi *${SUBCALENDAR_IDS[subid]}*,`;
+                    memberInfo += ` *${nickname.charAt(0).toUpperCase() +
+                      nickname.slice(1)}* lagi *${SUBCALENDAR_IDS[subid]}*,`
                   }
                 }
               }
@@ -188,7 +214,7 @@ function parseAttendance(chatId) {
           }
         }
         if (memberInfo) {
-          botMessage = `Halo halo~\r\nHari ini${memberInfo} jangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`;
+          botMessage = `Halo halo~\r\nHari ini${memberInfo} jangan kontak yang lagi cuti/GH/sakit/libur dulu ya guys, hehe`
         }
       }
       axios.post(sendMessageAPI, {
@@ -198,11 +224,27 @@ function parseAttendance(chatId) {
       })
     })
     .catch(function(error) {
-      axios.post(sendMessageAPI, {
-        chat_id: chatId,
-        text: `Ada error masa :( kabarin ${BOT_ADMIN} yaa~`
-      })
+      handleError(message, error)
     })
+}
+
+const isAuthorized = message => {
+  const username = `@${message.from.username}`
+  if (SQUAD_MEMBERS[username]) return true
+  axios.post(sendMessageAPI, {
+    chat_id: message.chat.id,
+    text: `Maaf kak, kamu bukan anggota ${SQUAD_NAME} :(`,
+    parse_mode: "HTML"
+  })
+  return false
+}
+
+const handleError = (message, error) => {
+  axios.post(sendMessageAPI, {
+    chat_id: message.chat.id,
+    text: `Ada error masa :( Coba kabarin / tanya kak ${BOT_ADMIN} yaa~`
+  })
+  console.warn(error)
 }
 
 // Health check
@@ -215,6 +257,8 @@ app.post('/new-message', function(req, res) {
   const { message } = req.body;
 
   if (typeof message === 'undefined' || typeof message.text === 'undefined') return res.send('OK');
+  if (!isAuthorized(message)) return res.send("OK")
+  const username = `@${message.from.username}`
 
   if (message.text.toLowerCase().indexOf('/registered_group') >= 0) {
     storage.getItem('registeredGroupId')
@@ -236,8 +280,63 @@ app.post('/new-message', function(req, res) {
     parseAttendance(message.chat.id);
   }
 
+  if (message.text.toLowerCase().indexOf("/ijin") >= 0) {
+    const splittedText = message.text.toLowerCase().split(" ")
+    if (splittedText.length < 3) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text:
+          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create or update Teamup event\r\nEx: /ijin remote today",
+        parse_mode: "HTML"
+      })
+      return res.send("OK")
+    }
+    let match = message.text.match(/ijin@?\S* (.*) (.*) (.*)/)
+    if (!match) match = message.text.match(/ijin@?\S* (.*) (.*)/)
+    const today = new Date()
+    if (match[2] === 'today') {
+      match[2] = new Date(today).toISOString().substring(0,10)
+    } else if (match[2] === 'tomorrow') {
+      tomorrow = new Date(today).setDate(today.getDate() + 1)
+      match[2] = new Date(tomorrow).toISOString().substring(0,10)
+    }
+    if (!dateRegex.test(match[2]) || !dateRegex.test(match[3])) {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text:
+          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create or update Teamup event\r\nEx: /ijin remote today",
+        parse_mode: "HTML"
+      })
+      return res.send("OK")
+    }
+    const subcalendarType = match[1].toLowerCase()
+    const startDate = new Date(match[2]).toISOString()
+    const endDate = new Date(match[3]).toISOString()
+    const payload = {
+      subcalendar_id: getKeyByValue(SUBCALENDAR_IDS, subcalendarType),
+      start_dt: startDate,
+      end_dt: endDate,
+      all_day: true,
+      title: capitalize(subcalendarType),
+      who: capitalize(SQUAD_MEMBERS[username][0])
+    }
+    createTeamupEvent(payload)
+      .request()
+      .then(response => {
+        axios.post(sendMessageAPI, {
+          chat_id: message.chat.id,
+          text:
+            "Sip, udah aku submit ke Teamup ya kak, makasih udah ngabarin :)",
+          parse_mode: "HTML"
+        })
+      })
+      .catch(message => {
+        handleError(message, error)
+      })
+  }
+
   if (message.text.toLowerCase().indexOf('/start_group') >= 0) {
-    if (`@${message.from.username}` !== BOT_ADMIN) {
+    if (username !== BOT_ADMIN) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text: `Maaf kak, cuma kak ${BOT_ADMIN} yg bisa ngestart group, hehe`
@@ -378,11 +477,8 @@ app.post('/new-message', function(req, res) {
               text: 'Status Development:\r\n' + development,
               parse_mode: "HTML"
             })
-          }).catch(err => {
-            axios.post(sendMessageAPI, {
-              chat_id: message.chat.id,
-              text: `Ada error masa :( kabarin ${BOT_ADMIN} yaa~`
-            })
+          }).catch(error => {
+            handleError(message, error)
           })
         });
       });
@@ -577,7 +673,7 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/start') >= 0) {
-    if (Object.keys(SQUAD_MEMBERS).includes(`@${message.from.username}`)) {
+    if (Object.keys(SQUAD_MEMBERS).includes(username)) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text: `Halo ${message.from.first_name}! Kenalin, aku WindiBot, yg bakal nemenin kamu selama kamu berada di squad ${SQUAD_NAME}! :D`,
@@ -593,7 +689,7 @@ app.post('/new-message', function(req, res) {
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n\r\nAsk ${BOT_ADMIN} for more information`,
+      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n<b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b>: create or update Teamup event\r\n\r\nAsk ${BOT_ADMIN} for more information`,
       parse_mode: "HTML"
     })
   }
