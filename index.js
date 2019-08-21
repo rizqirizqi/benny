@@ -296,9 +296,11 @@ app.post('/new-message', function(req, res) {
     const today = new Date()
     if (match[2] === 'today') {
       match[2] = new Date(today).toISOString().substring(0,10)
+      match[3] = match[2]
     } else if (match[2] === 'tomorrow') {
       tomorrow = new Date(today).setDate(today.getDate() + 1)
       match[2] = new Date(tomorrow).toISOString().substring(0,10)
+      match[3] = match[2]
     }
     if (!dateRegex.test(match[2]) || !dateRegex.test(match[3])) {
       axios.post(sendMessageAPI, {
