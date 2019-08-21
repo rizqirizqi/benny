@@ -119,7 +119,7 @@ var SUBCALENDAR_IDS = {
   3823676: 'remote',
   4461179: 'libur',
   3824264: 'sakit',
-  3823674: 'GH'
+  3823674: 'gh'
 }
 
 const storage = require('node-persist');
@@ -206,7 +206,7 @@ const parseAttendance = chatId => {
                 for (var subid in SUBCALENDAR_IDS) {
                   if (event.subcalendar_id === parseInt(subid)) {
                     memberInfo += ` *${nickname.charAt(0).toUpperCase() +
-                      nickname.slice(1)}* lagi *${SUBCALENDAR_IDS[subid]}*,`
+                      nickname.slice(1)}* lagi *${SUBCALENDAR_IDS[subid].toUpperCase()}*,`
                   }
                 }
               }
