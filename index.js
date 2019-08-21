@@ -332,7 +332,7 @@ app.post('/new-message', function(req, res) {
           parse_mode: "HTML"
         })
       })
-      .catch(message => {
+      .catch(error => {
         handleError(message, error)
       })
   }
