@@ -312,8 +312,8 @@ app.post('/new-message', function(req, res) {
       return res.send("OK")
     }
     const subcalendarType = match[1].toLowerCase()
-    const startDate = new Date(match[2]).toISOString()
-    const endDate = new Date(match[3]).toISOString()
+    const startDate = match[2]
+    const endDate = match[3]
     const payload = {
       subcalendar_id: getKeyByValue(SUBCALENDAR_IDS, subcalendarType),
       start_dt: startDate,
