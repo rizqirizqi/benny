@@ -320,7 +320,8 @@ app.post('/new-message', function(req, res) {
       end_dt: endDate,
       all_day: true,
       title: capitalize(subcalendarType),
-      who: capitalize(SQUAD_MEMBERS[username][0])
+      who: capitalize(SQUAD_MEMBERS[username][0]),
+      notes: 'This event was automatically created by WindiBot.'
     }
     createTeamupEvent(payload)
       .request()
