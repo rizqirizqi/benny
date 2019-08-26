@@ -122,6 +122,10 @@ var SUBCALENDAR_IDS = {
   3823674: 'gh'
 }
 
+var helpMessages = {
+  ijin: "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
+}
+
 const storage = require('node-persist');
 storage.init();
 
@@ -285,8 +289,7 @@ app.post('/new-message', function(req, res) {
     if (splittedText.length < 3) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text:
-          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
+        text: helpMessages.ijin,
         parse_mode: "HTML"
       })
       return res.send("OK")
@@ -302,20 +305,20 @@ app.post('/new-message', function(req, res) {
       match[2] = new Date(tomorrow).toISOString().substring(0,10)
       match[3] = match[2]
     }
-    if (!dateRegex.test(match[2]) || !dateRegex.test(match[3])) {
+    const subcalendarType = match[1].toLowerCase()
+    const subcalendarId = getKeyByValue(SUBCALENDAR_IDS, subcalendarType)
+    if (!dateRegex.test(match[2]) || !dateRegex.test(match[3]) || !subcalendarId) {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text:
-          "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
+        text: helpMessages.ijin,
         parse_mode: "HTML"
       })
       return res.send("OK")
     }
-    const subcalendarType = match[1].toLowerCase()
     const startDate = match[2]
     const endDate = match[3]
     const payload = {
-      subcalendar_id: getKeyByValue(SUBCALENDAR_IDS, subcalendarType),
+      subcalendar_id: subcalendarId,
       start_dt: startDate,
       end_dt: endDate,
       all_day: true,
