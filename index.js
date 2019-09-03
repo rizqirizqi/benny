@@ -79,7 +79,6 @@ var SQUAD_MEMBERS = {
   '@benyliantriana': ['beny'],
   '@damaera': ['luthfi', 'damaera'],
   '@dimasdanz': ['dimas'],
-  '@dendynp': ['dendy'],
   '@fadilmuhput': ['fadil'],
   '@faroukrizki': ['farouk'],
   '@ifanasution': ['ifa'],
@@ -89,7 +88,6 @@ var SQUAD_MEMBERS = {
   '@mgsrizqi': ['mgsrizqi'],
   '@nizwafay': ['papay', 'nizwa'],
   '@ochaadeea': ['ocha', 'zakina'],
-  '@PhantomX7': ['kenichi'],
   '@rahmisr': ['rahmi'],
   '@rahmatrasyidi': ['rasyidi'],
   '@reditaliskiyari': ['redit'],
@@ -100,7 +98,6 @@ var SQUAD_MEMBERS = {
   '@widyakumara': ['dewa'],
   '@williamlazuardi': ['william', 'lazuardi'],
   '@windiany': ['windi'],
-  '@ywardhana25': ['yayan', 'yulistian'],
   '@zitanada': ['zita']
 }
 WATER_TRIBE_MEMBER = [
@@ -120,6 +117,8 @@ var SUBCALENDAR_IDS = {
   3824264: 'sakit',
   3823674: 'gh'
 }
+
+var STANDUP_HANGOUT_URL = 'https://meet.google.com/gpx-nudt-nhf'
 
 var helpMessages = {
   ijin: "Use <b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b> to create Teamup event\r\nEx: /ijin remote today",
@@ -162,6 +161,11 @@ var standupJob = function() {
           axios.post(sendMessageAPI, {
             chat_id: registeredGroupId,
             text: standupAnnouncement
+          }).then(() => {
+            axios.post(sendMessageAPI, {
+              chat_id: registeredGroupId,
+              text: `Yg remote bisa hangout disini ya guys: ${STANDUP_HANGOUT_URL}`
+            })
           })
         })
         .catch(function(error) {
