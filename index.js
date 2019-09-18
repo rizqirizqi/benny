@@ -75,7 +75,6 @@ var SQUAD_NAME = 'O2O-Mitra'
 var SQUAD_MEMBERS = {
   '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
-  '@ayynurp': ['aya', 'wayan'],
   '@dimasdanz': ['dimas'],
   '@fadilmuhput': ['fadil'],
   '@faroukrizki': ['farouk'],
