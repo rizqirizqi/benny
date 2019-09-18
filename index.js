@@ -76,8 +76,6 @@ var SQUAD_MEMBERS = {
   '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
   '@ayynurp': ['aya', 'wayan'],
-  '@benyliantriana': ['beny'],
-  '@damaera': ['luthfi', 'damaera'],
   '@dimasdanz': ['dimas'],
   '@fadilmuhput': ['fadil'],
   '@faroukrizki': ['farouk'],
@@ -86,7 +84,6 @@ var SQUAD_MEMBERS = {
   '@juan_anton': ['juan'],
   '@liemhindrasanjaya': ['hindra'],
   '@mgsrizqi': ['mgsrizqi'],
-  '@nizwafay': ['papay', 'nizwa'],
   '@ochaadeea': ['ocha', 'zakina'],
   '@rahmisr': ['rahmi'],
   '@rahmatrasyidi': ['rasyidi'],
@@ -190,7 +187,7 @@ var attendanceJob = function() {
   })
 }
 var crons = {
-  standup14: new CronJob('00 30 11 * * 1-4', standupJob, null, true, 'Asia/Jakarta'),
+  standup14: new CronJob('00 15 11 * * 1-4', standupJob, null, true, 'Asia/Jakarta'),
   standup5: new CronJob('00 00 11 * * 5', standupJob, null, true, 'Asia/Jakarta'),
   attendance: new CronJob('00 00 09 * * 1-5', attendanceJob, null, true, 'Asia/Jakarta'),
 }
