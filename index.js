@@ -102,7 +102,6 @@ WATER_TRIBE_MEMBER = [
   '@Iqbalmabbit',
   '@wahymaulana',
   '@widyakumara',
-  '@windiany',
   '@zitanada'
 ]
 
