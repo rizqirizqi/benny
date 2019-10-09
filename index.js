@@ -73,17 +73,21 @@ var SQUAD_NAME = 'O2O-Mitra'
 
 // FULL SQUAD MEMBERS
 var SQUAD_MEMBERS = {
+  '@akbarstd': ['akbar'],
   '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
   '@dimasdanz': ['dimas'],
   '@fadilmuhput': ['fadil'],
   '@faroukrizki': ['farouk'],
+  '@gwahidt': ['geswa'],
+  '@haqiqiw': ['haqi', 'haqiqi'],
   '@ifanasution': ['ifa'],
   '@Iqbalmabbit': ['mabbit'],
   '@juan_anton': ['juan'],
   '@liemhindrasanjaya': ['hindra'],
   '@mgsrizqi': ['mgsrizqi'],
   '@ochaadeea': ['ocha', 'zakina'],
+  '@palski': ['adit', 'aditya'],
   '@rahmisr': ['rahmi'],
   '@rahmatrasyidi': ['rasyidi'],
   '@reditaliskiyari': ['redit'],
