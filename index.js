@@ -378,16 +378,12 @@ app.post('/new-message', function(req, res) {
         text: `Oncall\nPrimary: ${opsgenieRes.primaries.join(' / ')}\nSecondary: ${opsgenieRes.secondaries.join(' / ')}`,
         parse_mode: 'HTML'
       });
-
-      return res.send('OK');
     }).catch(err => {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
         text: `Something went wrong: ${err.message}`,
         parse_mode: "HTML"
       });
-
-      return res.send("OK");
     });
   }
 
