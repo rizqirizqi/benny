@@ -372,10 +372,10 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/oncall') >= 0) {
-    Opsgenie.oncall().then(res => {
+    Opsgenie.oncall().then(opsgenieRes => {
       axios.post(sendMessageAPI, {
         chat_id: message.chat.id,
-        text: `Oncall\nPrimary: ${res.primaries.join(' / ')}\nSecondary: ${res.secondaries.join(' / ')}`,
+        text: `Oncall\nPrimary: ${opsgenieRes.primaries.join(' / ')}\nSecondary: ${opsgenieRes.secondaries.join(' / ')}`,
         parse_mode: 'HTML'
       });
 
