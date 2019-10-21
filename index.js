@@ -128,6 +128,8 @@ storage.init();
 
 var CronJob = require('cron').CronJob;
 
+var Opsgenie = require('./src/opsgenie');
+
 var standupJob = function() {
   console.log('' + Date.now() + ' Sending Standup Meeting reminder... ');
   storage.getItem('registeredGroupId')
@@ -370,26 +372,22 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/oncall') >= 0) {
-    // Authenticate with the Google Spreadsheets API.
-    doc.useServiceAccountAuth(creds, function (err) {
-      // Get the cells from the first row of the spreadsheet.
-      doc.getCells(1,
-        {
-          "max-row": 1
-        }
-        , function (err, cells) {
-        var d = new Date(Date.now());
-        var diffDays = Math.round(Math.abs((d.getTime() - start.getTime())/(oneDay)));
-        var first = parseInt(diffDays / 7) % cells.length;
-        var second = parseInt(diffDays / 7) % cells.length + 1;
-        if (second == cells.length) {
-          second = 0;
-        }
-        axios.post(sendMessageAPI, {
-          chat_id: message.chat.id,
-          text: `On-Call Engineers ${SQUAD_NAME}: ${cells[first].value} dan ${cells[second].value}`
-        })
+    Opsgenie.oncall().then(res => {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: `Oncall\nPrimary: ${res.primaries.join(' / ')}\nSecondary: ${res.secondaries.join(' / ')}`,
+        parse_mode: 'HTML'
       });
+
+      return res.send('OK');
+    }).catch(err => {
+      axios.post(sendMessageAPI, {
+        chat_id: message.chat.id,
+        text: `Something went wrong: ${err.message}`,
+        parse_mode: "HTML"
+      });
+
+      return res.send("OK");
     });
   }
 
@@ -695,9 +693,23 @@ app.post('/new-message', function(req, res) {
   }
 
   if (message.text.toLowerCase().indexOf('/help') >= 0) {
+    const texts = [
+      `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task`,
+      `<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step`,
+      `<b>/revert [task number]</b>: Revert task one step`,
+      `<b>/fix [task number]</b>: Move task to "In Progress ✍️"`,
+      `<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link`,
+      `<b>/development</b>: View all development status`,
+      `<b>/attendance</b>: View attendance report`,
+      `<b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b>: create Teamup event`,
+      `<b>/oncall</b>: Show who is oncall right now`,
+      ``,
+      `Ask ${BOT_ADMIN} for more information`,
+    ];
+
     axios.post(sendMessageAPI, {
       chat_id: message.chat.id,
-      text: `<b>/add [task name] [PR/JIRA link (optional)]</b>: Add new task\r\n<b>/done [task number] [PR/JIRA link (optional)]</b>: Move task to the next step\r\n<b>/revert [task number]</b>: Revert task one step\r\n<b>/fix [task number]</b>: Move task to "In Progress ✍️"\r\n<b>/link [task number] [PR link (optional)]</b>: Show or update PR/JIRA link\r\n<b>/development</b>: View all development status\r\n<b>/oncall</b>: View oncall Engineer\r\n<b>/attendance</b>: View attendance report\r\n<b>/ijin [cuti|remote|libur|sakit|gh] [today|tomorrow|start_date:YYYY-MM-DD] [end_date(opt):YYYY-MM-DD]</b>: create Teamup event\r\n\r\nAsk ${BOT_ADMIN} for more information`,
+      text: texts.join('\r\n'),
       parse_mode: "HTML"
     })
   }
