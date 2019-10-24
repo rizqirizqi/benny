@@ -1,0 +1,26 @@
+# Deployment
+now . --public --target production\
+  -e BOT_NAME=WindiBot\
+  -e BOT_TOKEN=\
+  -e JIRA_API_KEY=\
+  -e JIRA_URL=\
+  -e OPSGENIE_API_KEY=\
+  -e PRIVATE_KEY_ID=\
+  -e SPREADSHEET_ID=\
+  -e TEAMUP_CALENDAR_KEY=\
+  -e TEAMUP_API_KEY=
+deployments=`now ls --all windibot | grep -oP "windibot-[A-Za-z]+\.now\.sh"`
+lasturl=`echo $deployments | tail -n 1`
+newurl=`echo $deployments | head -n 1`
+now alias $newurl windibot
+now rm $lasturl --yes
+
+# Attach Webhook
+curl -F "url=https://windibot.now.sh/new-message" https://api.telegram.org/bot631096215:AAFsux87mN6eVuoYcj36A25MpI1aLxvbpzQ/setWebhook
+response=`curl "https://windibot.now.sh/healthz"`
+if [[ $response == "OK" ]]; then
+	echo "Deployed! Dont forget to register the group (/start_group) and add https://windibot.now.sh/healthz to pinger service (statuscake)!"
+	echo ""
+else
+	echo "Deployment failed!"
+fi

@@ -21,25 +21,17 @@ O2O-Mitra Squad
   node index.js
   ```
 
-## Up and Running
+## Deployment
 1. Install `now` service
   ```
   npm install -g now
   ```
-2. Run `now` service
+2. Copy the deployment script and modify the env from `deploy.sh.sample` if needed
   ```
-  now --public\
-    -e BOT_NAME=WindiBot\
-    -e PRIVATE_KEY_ID=\
-    -e BOT_TOKEN=\
-    -e SPREADSHEET_ID=\
-    -e TEAMUP_CALENDAR_KEY=\
-    -e TEAMUP_API_KEY=\
-    -e JIRA_URL=\
-    -e JIRA_API_KEY=
+  cp deploy.sh.sample deploy.sh
+  chmod +x deploy.sh
   ```
-3. Set webhook
+3. Run deployment script
   ```
-  curl -F "url=https://xxxxx.now.sh/new-message" https://api.telegram.org/bot<your_api_token>/setWebhook
+  ./deploy.sh
   ```
-  Change 'xxxxx' to deployed url character
