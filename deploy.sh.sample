@@ -1,4 +1,5 @@
 # Deployment
+aliashost=`[MODIFY_HERE]`
 now . --public --target production\
   -e BOT_NAME=WindiBot\
   -e BOT_TOKEN=[MODIFY_HERE]\
@@ -12,14 +13,21 @@ now . --public --target production\
 deployments=`now ls --all windibot | grep -oP "windibot-[A-Za-z]+\.now\.sh"`
 lasturl=`echo $deployments | tail -n 1`
 newurl=`echo $deployments | head -n 1`
+if [[ -z $deployments ]]; then
+  echo "Deployment failed!"
+  exit 1
+fi
+now scale $newurl all 1
 now alias $newurl windibot
-now rm $lasturl --yes
+if [[ $lasturl != $newurl ]]; then
+  now rm $lasturl --yes
+fi
 
 # Attach Webhook
-curl -F "url=[MODIFY_HERE]/new-message" https://api.telegram.org/bot[MODIFY_HERE]/setWebhook
-response=`curl "[MODIFY_HERE]/healthz"`
+curl -F "url=$aliashost/new-message" https://api.telegram.org/bot[MODIFY_HERE]/setWebhook
+response=`curl "$aliashost/healthz"`
 if [[ $response == "OK" ]]; then
-	echo "Deployed! Dont forget to register the group (/start_group) and add [MODIFY_HERE]/healthz to pinger service (statuscake)!"
+	echo "Deployed! Dont forget to register the group (/start_group) and add $aliashost/healthz to pinger service (statuscake)!"
 	echo ""
 else
 	echo "Deployment failed!"
