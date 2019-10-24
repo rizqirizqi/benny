@@ -77,6 +77,7 @@ var SQUAD_MEMBERS = {
   '@anansyahsaiful': ['ipul', 'saiful'],
   '@andi_h': ['andi'],
   '@dimasdanz': ['dimas'],
+  '@eloknadialdf': ['elok'],
   '@fadilmuhput': ['fadil'],
   '@faroukrizki': ['farouk'],
   '@gwahidt': ['geswa'],
