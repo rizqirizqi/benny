@@ -11,8 +11,8 @@ now . --public --target production\
   -e TEAMUP_CALENDAR_KEY=[MODIFY_HERE]\
   -e TEAMUP_API_KEY=[MODIFY_HERE]
 deployments=`now ls --all windibot | grep -oP "windibot-[A-Za-z]+\.now\.sh"`
-lasturl=`echo $deployments | tail -n 1`
-newurl=`echo $deployments | head -n 1`
+lasturl=`echo $deployments | cut -d' ' -f2`
+newurl=`echo $deployments | cut -d' ' -f1`
 if [[ -z $deployments ]]; then
   echo "Deployment failed!"
   exit 1
