@@ -90,7 +90,6 @@ var SQUAD_MEMBERS = {
   '@ochaadeea': ['ocha', 'zakina'],
   '@palski': ['adit', 'aditya'],
   '@rahmatrasyidi': ['rasyidi'],
-  '@reditaliskiyari': ['redit'],
   '@rynaldoryan': ['ryan'],
   '@sitisj': ['siti', 'sije', 'jumaliaya'],
   '@wahymaulana': ['wahyu'],
@@ -102,7 +101,6 @@ var SQUAD_MEMBERS = {
 WATER_TRIBE_MEMBER = [
   '@anansyahsaiful',
   '@ifanasution',
-  '@intanamalia',
   '@Iqbalmabbit',
   '@wahymaulana',
   '@widyakumara',
